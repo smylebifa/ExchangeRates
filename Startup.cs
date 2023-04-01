@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WebApplication2.Data;
 using Microsoft.EntityFrameworkCore;
+using WebApplication2.Services;
 
 namespace WebApplication2
 {
@@ -17,7 +18,6 @@ namespace WebApplication2
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             //services.AddControllers();
@@ -29,9 +29,9 @@ namespace WebApplication2
             services.AddDbContext<ExchangeRatesDbContext>(options => options.UseMySql(mySqlConnectionStr,
                 ServerVersion.AutoDetect(mySqlConnectionStr)));
 
+            services.AddTransient<ExchangeRatesService>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -44,7 +44,7 @@ namespace WebApplication2
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
-                //c.RoutePrefix = string.Empty;
+                c.RoutePrefix = string.Empty;
             });
 
             app.UseHttpsRedirection();
@@ -55,6 +55,7 @@ namespace WebApplication2
             {
                 endpoints.MapControllers();
             });
+           
         }
     }
 }

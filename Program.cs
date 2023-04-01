@@ -14,6 +14,11 @@ namespace WebApplication2
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
+
+            //var host = CreateHostBuilder(args);
+            //var app = host.Build();
+            //DbInitializer.InitializeDb(app);
+            //app.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

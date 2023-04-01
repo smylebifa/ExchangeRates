@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace WebApplication2.Controllers
 {
     public class FillingInExchangeRatesController : Controller
@@ -17,9 +15,8 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost("/save_exchange_rates")]
-        public IActionResult  SaveExchangeRatesByPeriodInDB()
+        public IActionResult SaveExchangeRatesByPeriodInDB()
         {
-
             return RedirectToAction("Index", "FillingInExchangeRates", new { status = "success" });
         }
     }
