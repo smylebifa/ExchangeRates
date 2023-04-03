@@ -1,0 +1,50 @@
+﻿@{
+    ViewBag.Title = "Сохранение валют";
+}
+
+    <form method="post" asp-action="SaveExchangeRatesByPeriodInDB" name="addThemeForm" style="border-color: #343a40;">
+
+        <table>
+
+            <tr>
+                <td style="padding: 4px;">Срок - начало:</td>
+                <td style="padding: 4px;">
+                    <input type="date" id="WorkStart" name="WorkStart" min="1950-01-01" />
+                </td>
+            </tr>
+
+            <tr>
+                <td style="padding: 4px;">Срок - конец:</td>
+                <td style="padding: 4px;">
+                    <input type="date" id="WorkEnd" name="WorkEnd" min="1950-01-01" />
+                </td>
+            </tr>
+
+           
+
+            @*<tr>
+                <td style="padding: 4px;">Статус:</td>
+                <td style="padding: 4px;">
+                    <input type="text" name="Status" />
+                </td>
+            </tr>*@
+
+            <br />
+
+         
+            <tr>
+                <td style="padding: 4px;">
+                </td>
+
+                <td style="padding: 4px;">
+                    <a class="btn btn-outline-dark" href="/" style="text-align:center">Отмена</a>
+                    <input type="submit" class="btn btn-outline-primary submitBtn" value="Добавить тему" />
+                </td>
+
+                <td style="padding: 4px;">
+                </td>
+            </tr>
+
+        </table>
+
+    </form>

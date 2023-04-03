@@ -1,14 +1,21 @@
 ﻿using System.Collections.Generic;
+using WebApplication2.Data;
 using WebApplication2.Model;
 
 namespace WebApplication2.Services
 {
     public class ExchangeRatesService
     {
-        public static List<ExchangeRate> exchangeRates = new List<ExchangeRate>
+        ExchangeRatesDbContext _dbContext;
+
+        public ExchangeRatesService (ExchangeRatesDbContext dbContext)
         {
-            //new ExchangeRate(1.0f),
-            //new ExchangeRate(2.0f)
-        };
+            _dbContext = dbContext;
+        }
+
+        public void parseStringOfRatesByYear(string stringToParse)
+        {
+            int a = 0;            
+        }
     }
 }
