@@ -69,7 +69,6 @@ namespace WebApplication2.Services
 
                             if (dateActionsForFirstDate(dateStr, firstMonth, firstDay)) 
                                 createExchangeRatesObj(exchangeRates, dateStr, currencies);
-
                         }
                     }
 
@@ -121,6 +120,8 @@ namespace WebApplication2.Services
                 }
             }
 
+            //_dbContext.SaveChanges();
+
             return exchangeRatesObj;
         }
 
@@ -155,16 +156,25 @@ namespace WebApplication2.Services
             if (exchangeRates[0] == "Date")
             {
                 // Обход курсов валют по строке - дате
-                for (int ic = 1; ic < exchangeRates.Length; ic++)
+                for (int i = 1; i < exchangeRates.Length; i++)
                 {
-                    currencies[ic - 1] = exchangeRates[ic];
+                    currencies[i - 1] = exchangeRates[i];
+
+                    Currency currency = new Currency()
+                    {
+                        Code = exchangeRates[i],
+                    };
+
+                    //if(_dbContext.Currencies.FirstOrDefault(x => x.Code == exchangeRates[i]) == null) 
+                    //    _dbContext.Currencies.Add(currency);
                 }
             }
 
+            //_dbContext.SaveChanges();
+
             return currencies;
         }
-
-
+        
         private bool dateActionsForFirstDate(string dateStr, int firstMonth, int firstDay)
         {
             if (dateStr != "")
@@ -230,11 +240,14 @@ namespace WebApplication2.Services
                 {
                     Id = i,
                     Date = date,
+                    //Currency = new Currency() { Code = currencies[i - 1] },
                     CurrencyCode = currencies[i - 1],
                     Rate = rate
                 };
 
                 exchangeRatesObj.Add(exchangeRateObj);
+
+                //_dbContext.ExchangeRates.Add(exchangeRateObj);
             }
         }
     }
