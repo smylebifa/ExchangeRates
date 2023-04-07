@@ -17,50 +17,26 @@ namespace WebApplication2.Controllers
     public class ExchangeRatesController : ControllerBase
     {
         private readonly ILogger<ExchangeRatesController> _logger;
-        private readonly ExchangeRatesDbContext _dbContext;
+        ExchangeRatesService _exchangeRatesService;
 
-        //ExchangeRatesService _exchangeRatesService;
-
-
-        public ExchangeRatesController(ILogger<ExchangeRatesController> logger, ExchangeRatesDbContext dbContext)
+        public ExchangeRatesController(ILogger<ExchangeRatesController> logger, ExchangeRatesService exchangeRatesService)
         {
             _logger = logger;
-            //_exchangeRatesService = exchangeRatesService;
-            _dbContext = dbContext;
+            _exchangeRatesService = exchangeRatesService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ExchangeRate>>> Get()
+        [HttpGet("/get_all_currencies")]
+        public async Task<IEnumerable<ExchangeRate>> GetAllCurencies()
         {
-            return await _dbContext.ExchangeRates.ToListAsync();
+            return await _exchangeRatesService.GetExchangeRatesAsync();
         }
 
-        [HttpPost]
-        public async Task<ActionResult> Post()
+
+        [HttpPost("/save_currencies_by_period/{first_date}/{last_date}")]
+        public async Task<IEnumerable<ExchangeRate>>  SaveCurrenciesByPeriod(DateTime first_date, DateTime last_date)
         {
-            WebClient web = new WebClient();
-            string htmlStr = web.DownloadString("https://www.cnb.cz/en/financial_markets/foreign_exchange_market/exchange_rate_fixing/year.txt?year=2019");
-
-            //_exchangeRatesService.parseStringOfRatesByYear(htmlStr);
-                
-            //ExchangeRate exchangeRate = new ExchangeRate { Id = 2, CurrencyUSD = "USD", Rate = 200f, Date = DateTime.Now };
-
-            //_dbContext.ExchangeRates.Add(exchangeRate);
-           await _dbContext.SaveChangesAsync();
-            return Ok();
+            return await _exchangeRatesService.parseExchangeRatesByPeriodAsync(first_date, last_date); 
         }
 
-        //[HttpGet]
-        //public IEnumerable<WeatherForecast> Get()
-        //{
-        //    var rng = new Random();
-        //    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        //    {
-        //        Date = DateTime.Now.AddDays(index),
-        //        TemperatureC = rng.Next(-20, 55),
-        //        Summary = Summaries[rng.Next(Summaries.Length)]
-        //    })
-        //    .ToArray();
-        //}
     }
 }

@@ -29,7 +29,7 @@ namespace WebApplication2
             services.AddDbContext<ExchangeRatesDbContext>(options => options.UseMySql(mySqlConnectionStr,
                 ServerVersion.AutoDetect(mySqlConnectionStr)));
 
-            //services.AddTransient<ExchangeRatesService>();
+            services.AddTransient<ExchangeRatesService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -44,7 +44,6 @@ namespace WebApplication2
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
-                //c.RoutePrefix = string.Empty;
             });
 
             app.UseHttpsRedirection();
