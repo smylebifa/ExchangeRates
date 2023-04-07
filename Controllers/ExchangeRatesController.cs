@@ -33,9 +33,11 @@ namespace WebApplication2.Controllers
 
 
         [HttpPost("/save_currencies_by_period/{first_date}/{last_date}")]
-        public async Task<IEnumerable<ExchangeRate>>  SaveCurrenciesByPeriod(DateTime first_date, DateTime last_date)
+        public IEnumerable<ExchangeRate> SaveCurrenciesByPeriod(DateTime first_date, DateTime last_date)
         {
-            return await _exchangeRatesService.parseExchangeRatesByPeriodAsync(first_date, last_date); 
+            List<ExchangeRate> exchangeRates = _exchangeRatesService.parseExchangeRatesByPeriod(first_date, last_date);
+
+            return exchangeRates; 
         }
 
     }
