@@ -25,21 +25,21 @@ namespace WebApplication2.Controllers
             _exchangeRatesService = exchangeRatesService;
         }
 
-        [HttpPost("/save_currencies_by_period/{first_date}/{last_date}")]
-        public IEnumerable<ExchangeRate> SaveCurrenciesByPeriod(DateTime first_date, DateTime last_date)
+        [HttpPost("/save_currencies/{first_date}/{last_date}")]
+        public IEnumerable<ExchangeRate> SaveCurrencies(DateTime first_date, DateTime last_date)
         {
-            List<ExchangeRate> exchangeRates = _exchangeRatesService.parseExchangeRatesByPeriod(first_date, last_date);
-
+            List<ExchangeRate> exchangeRates = _exchangeRatesService.saveParsedCurrencies(first_date, last_date);
             return exchangeRates; 
         }
 
-        [HttpPost("/get_currency_data_by_period/{currency_code}/{first_date}/{last_date}")]
-        public Dictionary<string, float> GetDataFromExchangeRate(string currency_code, DateTime first_date, DateTime last_date)
+
+        [HttpPost("/exchange_rate_statistics/{currency_code}/{first_date}/{last_date}")]
+        public Dictionary<string, float> ExchangeRateStatistics(string currency_code, DateTime first_date, DateTime last_date)
         {
             Dictionary<string, float> result = _exchangeRatesService.GetDataFromExchangeRate(currency_code, first_date, last_date);
-
             return result;
         }
+
 
         [HttpGet("/get_up_to_date_rates/{currency_code}")]
         public async Task GetUpToDateExchangeRates(string currency_code)

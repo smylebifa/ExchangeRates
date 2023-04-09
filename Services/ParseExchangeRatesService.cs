@@ -19,6 +19,7 @@ namespace WebApplication2.Services
 
         private int firstYearInt, lastYearInt, firstMonth, lastMonth, firstDay, lastDay;
         private string[] currencies;
+        private int[] amountOfCurrencies;
 
         public List<ExchangeRate> parseExchangeRatesByPeriod(DateTime first_date, DateTime last_date)
         {
@@ -28,6 +29,7 @@ namespace WebApplication2.Services
             // подготавливаем массивы для хранения данных
             exchangeRatesList = new List<ExchangeRate>();
             currencies = new string[35];
+            amountOfCurrencies = new int[35];
 
             WebClient web = new WebClient();
             string downloadedString;
@@ -177,17 +179,26 @@ namespace WebApplication2.Services
             lastDay = Int32.Parse(lastDayStr);
         }
 
-        private void parseAndSaveCurrencies(string stringWithExchangeRates)
+        private void parseAndSaveCurrencies(string currenciesForParse)
         {
-            string[] exchangeRatesParsed = stringWithExchangeRates.Split('|');
-            string[] currenciesForParsing = new string[35];
-            if (exchangeRatesParsed[0] == "Date")
+            string[] currenciesParsed = currenciesForParse.Split('|');
+            
+            string[] currenciesForSave = new string[35];
+            int[] amountOfCurrenciesForSave = new int[35];
+            
+            string[] currencyAndAmount;
+            if (currenciesParsed[0] == "Date")
             {
                 // Обход курсов валют по строке - дате
-                for (int i = 1; i < exchangeRatesParsed.Length; i++)
-                    currenciesForParsing[i - 1] = exchangeRatesParsed[i];
+                for (int i = 1; i < currenciesParsed.Length; i++)
+                {
+                    currencyAndAmount = currenciesParsed[i].Split(' ');
+                    amountOfCurrenciesForSave[i - 1] = Int32.Parse(currencyAndAmount[0]);
+                    currenciesForSave[i - 1] = currencyAndAmount[1];
+                }
             }
-            currencies = currenciesForParsing;
+            currencies = currenciesForSave;
+            amountOfCurrencies = amountOfCurrenciesForSave;
         }
 
         //Обход курсов валют и возврат по строке - дате
@@ -209,7 +220,7 @@ namespace WebApplication2.Services
                     Id = index,
                     Date = dateParsed,
                     CurrencyCode = currencies[index - 1],
-                    Rate = exchangeRateFloat
+                    Rate = exchangeRateFloat / amountOfCurrencies[index - 1]
                 };
 
                 exchangeRatesList.Add(exchangeRate);
