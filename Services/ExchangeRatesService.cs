@@ -25,30 +25,30 @@ namespace WebApplication2.Services
 
         // Незавершенное - пока что увеличивает полученный пользователем курс на единицу каждую секунду 
         // (должны парситься текущие курсы и сохраняться в БД по расписанию)
-        public async Task GetUpToDateExchangeRates(string currency_code)
+        public async Task GetUpToDateExchangeRates()
         {
+            List<ExchangeRate> exchangeRates;
+
             StdSchedulerFactory factory = new StdSchedulerFactory();
             IScheduler scheduler = await factory.GetScheduler();
 
             await scheduler.Start();
 
-            ExchangeRate exchangeRate;
-            bool shutDown = false;
-            int index = 0;
-
-            while (index < 5)
+            DateTime timeToShutDown = DateTime.Now.AddMinutes(1.0f);
+            
+            bool triggerShutDown = false;
+            while (!triggerShutDown)
             {
-                await Task.Delay(TimeSpan.FromSeconds(1));
+                await Task.Delay(TimeSpan.FromSeconds(5));
 
-                exchangeRate = _dbContext.ExchangeRates.FirstOrDefault(x => x.CurrencyCode == currency_code);
-                exchangeRate.Rate += 1.0f;
-                _dbContext.ExchangeRates.Update(exchangeRate);
-                _dbContext.SaveChanges();
+                exchangeRates = _parseExchangeRatesService.parseCurrentExchangeRates();
+                saveExchangeRate(exchangeRates);
 
-                index++;
-
-                if (index == 5)
+                if (DateTime.Now > timeToShutDown)
+                {
                     await scheduler.Shutdown();
+                    triggerShutDown = true;
+                }
             }
         }
 
@@ -82,7 +82,12 @@ namespace WebApplication2.Services
         public List<ExchangeRate> saveParsedCurrencies(DateTime first_date, DateTime last_date)
         {
             List<ExchangeRate> exchangeRates = _parseExchangeRatesService.parseExchangeRatesByPeriod(first_date, last_date);
+            saveExchangeRate(exchangeRates);
+            return exchangeRates;
+        }
 
+        private void saveExchangeRate(List<ExchangeRate> exchangeRates)
+        {
             var exchangeRateTable = _dbContext.ExchangeRates.FirstOrDefault();
             if (exchangeRateTable == null)
             {
@@ -95,9 +100,9 @@ namespace WebApplication2.Services
             foreach (ExchangeRate exchangeRate in exchangeRates)
             {
                 // Проверка на дубликаты
-                var foundedExchangeRate = _dbContext.ExchangeRates.FirstOrDefault(x => x.CurrencyCode == exchangeRate.CurrencyCode && 
+                var foundedExchangeRate = _dbContext.ExchangeRates.FirstOrDefault(x => x.CurrencyCode == exchangeRate.CurrencyCode &&
                 x.Rate == exchangeRate.Rate && x.Date == exchangeRate.Date);
-               
+
                 if (foundedExchangeRate != null)
                     continue;
 
@@ -106,8 +111,6 @@ namespace WebApplication2.Services
                 _dbContext.ExchangeRates.Add(exchangeRate);
                 _dbContext.SaveChanges();
             }
-            
-            return exchangeRates;
         }
     }
 }

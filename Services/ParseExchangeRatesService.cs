@@ -15,6 +15,9 @@ namespace WebApplication2.Services
         private string WebPathOfExchangeRatesByPeriod =
             "https://www.cnb.cz/en/financial_markets/foreign_exchange_market/exchange_rate_fixing/year.txt?year=";
 
+        private string WebPathOfCurrentExchangeRates =
+            "https://www.cnb.cz/en/financial_markets/foreign_exchange_market/exchange_rate_fixing/daily.txt?date=";
+        
         private List<ExchangeRate> exchangeRatesList;
 
         private int firstYearInt, lastYearInt, firstMonth, lastMonth, firstDay, lastDay;
@@ -25,7 +28,7 @@ namespace WebApplication2.Services
         {
             // Парсим и сохраняем временно переданные даты
             parseAndSaveDates(first_date, last_date);
-            
+
             // подготавливаем массивы для хранения данных
             exchangeRatesList = new List<ExchangeRate>();
             currencies = new string[35];
@@ -182,10 +185,10 @@ namespace WebApplication2.Services
         private void parseAndSaveCurrencies(string currenciesForParse)
         {
             string[] currenciesParsed = currenciesForParse.Split('|');
-            
+
             string[] currenciesForSave = new string[35];
             int[] amountOfCurrenciesForSave = new int[35];
-            
+
             string[] currencyAndAmount;
             if (currenciesParsed[0] == "Date")
             {
@@ -208,13 +211,13 @@ namespace WebApplication2.Services
             float exchangeRateFloat;
             DateTime dateParsed;
             ExchangeRate exchangeRate;
-            
+
             for (int index = 1; index < exchangeRatesParsed.Length; index++)
             {
                 exchangeRateStr = exchangeRatesParsed[index];
                 exchangeRateFloat = float.Parse(exchangeRateStr, CultureInfo.InvariantCulture.NumberFormat);
                 dateParsed = DateTime.Parse(dateStr);
-                
+
                 exchangeRate = new ExchangeRate()
                 {
                     Id = index,
@@ -225,6 +228,55 @@ namespace WebApplication2.Services
 
                 exchangeRatesList.Add(exchangeRate);
             }
+        }
+
+        public List<ExchangeRate> parseCurrentExchangeRates()
+        {
+            exchangeRatesList = new List<ExchangeRate>();
+            currencies = new string[35];
+            amountOfCurrencies = new int[35];
+
+            WebClient web = new WebClient();
+            string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
+            string downloadedString = web.DownloadString(WebPathOfCurrentExchangeRates + currentDate);
+            string[] stringsWithExchangeRates = downloadedString.Split('\n');
+
+            string stringWithExchangeRate;
+            string[] exchangeRateData;
+            ExchangeRate exchangeRate;
+            string exchangeRateStr;
+            float exchangeRateFloat;
+            DateTime dateParsed;
+
+            // Построчный обход валют 
+            for (int j = 2; j < stringsWithExchangeRates.Length; j++)
+            {
+                stringWithExchangeRate = stringsWithExchangeRates[j];
+
+                if (stringWithExchangeRate != "")
+                {
+                    exchangeRateData = stringWithExchangeRate.Split('|');
+
+                    amountOfCurrencies[j - 2] = Int32.Parse(exchangeRateData[2]);
+                    currencies[j - 2] = exchangeRateData[3];
+
+                    exchangeRateStr = exchangeRateData[4];
+                    exchangeRateFloat = float.Parse(exchangeRateStr, CultureInfo.InvariantCulture.NumberFormat);
+
+                    dateParsed = DateTime.Parse(currentDate);
+
+                    exchangeRate = new ExchangeRate()
+                    {
+                        Id = j - 1,
+                        Date = dateParsed,
+                        CurrencyCode = currencies[j - 2],
+                        Rate = exchangeRateFloat / amountOfCurrencies[j - 2]
+                    };
+
+                    exchangeRatesList.Add(exchangeRate);
+                }
+            }
+            return exchangeRatesList;
         }
     }
 }
