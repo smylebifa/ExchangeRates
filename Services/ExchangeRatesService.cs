@@ -23,7 +23,8 @@ namespace WebApplication2.Services
             _parseExchangeRatesService = parseExchangeRatesService;
         }
 
-        
+        // Незавершенное - пока что увеличивает полученный пользователем курс на единицу каждую секунду 
+        // (должны парситься текущие курсы и сохраняться в БД)
         public async Task GetUpToDateExchangeRates(string currency_code)
         {
             StdSchedulerFactory factory = new StdSchedulerFactory();
@@ -41,7 +42,7 @@ namespace WebApplication2.Services
                 exchangeRate = _dbContext.ExchangeRates.FirstOrDefault(x => x.CurrencyCode == currency_code);
                 exchangeRate.Rate += 1.0f;
                 _dbContext.ExchangeRates.Update(exchangeRate);
-                _dbContext.SaveChangesAsync();
+                _dbContext.SaveChanges();
 
                 if (shutDown)
                     await scheduler.Shutdown();
