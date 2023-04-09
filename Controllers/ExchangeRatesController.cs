@@ -25,13 +25,6 @@ namespace WebApplication2.Controllers
             _exchangeRatesService = exchangeRatesService;
         }
 
-        [HttpGet("/get_all_currencies")]
-        public async Task<IEnumerable<ExchangeRate>> GetAllCurencies()
-        {
-            return await _exchangeRatesService.GetExchangeRatesAsync();
-        }
-
-
         [HttpPost("/save_currencies_by_period/{first_date}/{last_date}")]
         public IEnumerable<ExchangeRate> SaveCurrenciesByPeriod(DateTime first_date, DateTime last_date)
         {
@@ -48,7 +41,11 @@ namespace WebApplication2.Controllers
             return result;
         }
 
-        
+        [HttpGet("/get_up_to_date_rates/{currency_code}")]
+        public async Task<ExchangeRate> GetUpToDateExchangeRates(string currency_code)
+        {
+            return await _exchangeRatesService.GetUpToDateExchangeRates(currency_code);
+        }
 
     }
 }

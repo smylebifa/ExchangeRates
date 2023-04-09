@@ -31,7 +31,6 @@ namespace WebApplication2
 
             services.AddTransient<ExchangeRatesService>();
             services.AddTransient<ParseExchangeRatesService>();
-
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

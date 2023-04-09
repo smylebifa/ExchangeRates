@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Quartz;
+using Quartz.Impl;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -20,9 +22,30 @@ namespace WebApplication2.Services
             _dbContext = dbContext;
             _parseExchangeRatesService = parseExchangeRatesService;
         }
-        public async Task<List<ExchangeRate>> GetExchangeRatesAsync()
+
+        
+        public async Task GetUpToDateExchangeRates(string currency_code)
         {
-            return await _dbContext.ExchangeRates.ToListAsync();
+            StdSchedulerFactory factory = new StdSchedulerFactory();
+            IScheduler scheduler = await factory.GetScheduler();
+
+            await scheduler.Start();
+
+            ExchangeRate exchangeRate;
+            bool shutDown = false;
+
+            while (!shutDown)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1));
+
+                exchangeRate = _dbContext.ExchangeRates.FirstOrDefault(x => x.CurrencyCode == currency_code);
+                exchangeRate.Rate += 1.0f;
+                _dbContext.ExchangeRates.Update(exchangeRate);
+                _dbContext.SaveChangesAsync();
+
+                if (shutDown)
+                    await scheduler.Shutdown();
+            }
         }
 
         public Dictionary<string, float> GetDataFromExchangeRate(string currency_code, DateTime first_date, DateTime last_date)
