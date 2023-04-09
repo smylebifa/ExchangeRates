@@ -13,7 +13,5 @@ namespace WebApplication2.Data
         {
         }
         public DbSet<ExchangeRate> ExchangeRates { get; set; } = null!;
-        public DbSet<Currency> Currencies { get; set; } = null!;
-        
     }
 }

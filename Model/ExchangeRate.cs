@@ -8,11 +8,7 @@ namespace WebApplication2.Model
     {
         [Key]
         public int Id { get; set; }
-        
         public string CurrencyCode { get; set; }
-        
-        [ForeignKey("CurrencyCode")] 
-        public Currency Currency { get; set; }
         public float Rate { get; set; }
         public DateTime Date { get; set; }
     }
