@@ -42,9 +42,9 @@ namespace WebApplication2.Controllers
         }
 
         [HttpGet("/get_up_to_date_rates/{currency_code}")]
-        public async Task<ExchangeRate> GetUpToDateExchangeRates(string currency_code)
+        public async Task GetUpToDateExchangeRates(string currency_code)
         {
-            return await _exchangeRatesService.GetUpToDateExchangeRates(currency_code);
+            await _exchangeRatesService.GetUpToDateExchangeRates(currency_code);
         }
 
     }
