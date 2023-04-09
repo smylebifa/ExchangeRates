@@ -34,9 +34,9 @@ namespace WebApplication2.Controllers
 
 
         [HttpPost("/exchange_rate_statistics/{currency_code}/{first_date}/{last_date}")]
-        public Dictionary<string, float> ExchangeRateStatistics(string currency_code, DateTime first_date, DateTime last_date)
+        public Dictionary<string, double> ExchangeRateStatistics(string currency_code, DateTime first_date, DateTime last_date)
         {
-            Dictionary<string, float> result = _exchangeRatesService.GetDataFromExchangeRate(currency_code, first_date, last_date);
+            Dictionary<string, double> result = _exchangeRatesService.GetDataFromExchangeRate(currency_code, first_date, last_date);
             return result;
         }
 

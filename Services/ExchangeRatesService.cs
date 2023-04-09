@@ -35,7 +35,7 @@ namespace WebApplication2.Services
             await scheduler.Start();
 
             DateTime timeToShutDown = DateTime.Now.AddMinutes(1.0f);
-            
+
             bool triggerShutDown = false;
             while (!triggerShutDown)
             {
@@ -52,7 +52,7 @@ namespace WebApplication2.Services
             }
         }
 
-        public Dictionary<string, float> GetDataFromExchangeRate(string currency_code, DateTime first_date, DateTime last_date)
+        public Dictionary<string, double> GetDataFromExchangeRate(string currency_code, DateTime first_date, DateTime last_date)
         {
             List<ExchangeRate> exchangeRates = _dbContext.ExchangeRates.ToList();
 
@@ -66,11 +66,11 @@ namespace WebApplication2.Services
 
             else
             {
-                float min = ratesOfCurrency.Min();
-                float max = ratesOfCurrency.Max();
-                float average = ratesOfCurrency.Average();
+                double min = ratesOfCurrency.Min();
+                double max = ratesOfCurrency.Max();
+                double average = ratesOfCurrency.Average();
 
-                Dictionary<string, float> result = new Dictionary<string, float>();
+                Dictionary<string, double> result = new Dictionary<string, double>();
                 result.Add("Мнимальное значение за период", min);
                 result.Add("Максимальное значение за период", max);
                 result.Add("Среднее значение за период", average);
@@ -100,7 +100,8 @@ namespace WebApplication2.Services
             foreach (ExchangeRate exchangeRate in exchangeRates)
             {
                 // Проверка на дубликаты
-                var foundedExchangeRate = _dbContext.ExchangeRates.FirstOrDefault(x => x.CurrencyCode == exchangeRate.CurrencyCode &&
+                var foundedExchangeRate = _dbContext.ExchangeRates.FirstOrDefault(x => 
+                x.CurrencyCode == exchangeRate.CurrencyCode && 
                 x.Rate == exchangeRate.Rate && x.Date == exchangeRate.Date);
 
                 if (foundedExchangeRate != null)

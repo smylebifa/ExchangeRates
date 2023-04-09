@@ -42,7 +42,7 @@ namespace WebApplication2.Services
             int countOfYears = lastYearInt - firstYearInt;
             for (int index = 0; index <= countOfYears; index++)
             {
-                yearToParseStr = (firstYearInt + index).ToString();
+                yearToParseStr = (firstYearInt + index).ToString("yyyy-MM-dd");
                 downloadedString = web.DownloadString(WebPathOfExchangeRatesByPeriod + yearToParseStr);
                 stringsWithExchangeRates = downloadedString.Split('\n');
 
@@ -67,7 +67,7 @@ namespace WebApplication2.Services
                 {
                     stringWithExchangeRates = stringsWithExchangeRates[j];
                     exchangeRates = stringWithExchangeRates.Split('|');
-                    dateStr = exchangeRates[0];
+                    dateStr = exchangeRates[0].ToString();
 
                     if (dateStr != "")
                         addExchangeRatesAsync(exchangeRates, dateStr, currencies);
@@ -208,14 +208,14 @@ namespace WebApplication2.Services
         private void addExchangeRatesAsync(string[] exchangeRatesParsed, string dateStr, string[] currencies)
         {
             string exchangeRateStr;
-            float exchangeRateFloat;
+            double exchangeRateDouble;
             DateTime dateParsed;
             ExchangeRate exchangeRate;
 
             for (int index = 1; index < exchangeRatesParsed.Length; index++)
             {
                 exchangeRateStr = exchangeRatesParsed[index];
-                exchangeRateFloat = float.Parse(exchangeRateStr, CultureInfo.InvariantCulture.NumberFormat);
+                exchangeRateDouble = Double.Parse(exchangeRateStr, CultureInfo.InvariantCulture.NumberFormat);
                 dateParsed = DateTime.Parse(dateStr);
 
                 exchangeRate = new ExchangeRate()
@@ -223,7 +223,7 @@ namespace WebApplication2.Services
                     Id = index,
                     Date = dateParsed,
                     CurrencyCode = currencies[index - 1],
-                    Rate = exchangeRateFloat / amountOfCurrencies[index - 1]
+                    Rate = exchangeRateDouble / amountOfCurrencies[index - 1]
                 };
 
                 exchangeRatesList.Add(exchangeRate);
@@ -245,7 +245,7 @@ namespace WebApplication2.Services
             string[] exchangeRateData;
             ExchangeRate exchangeRate;
             string exchangeRateStr;
-            float exchangeRateFloat;
+            double exchangeRateDouble;
             DateTime dateParsed;
 
             // Построчный обход валют 
@@ -261,7 +261,7 @@ namespace WebApplication2.Services
                     currencies[j - 2] = exchangeRateData[3];
 
                     exchangeRateStr = exchangeRateData[4];
-                    exchangeRateFloat = float.Parse(exchangeRateStr, CultureInfo.InvariantCulture.NumberFormat);
+                    exchangeRateDouble = Double.Parse(exchangeRateStr, CultureInfo.InvariantCulture.NumberFormat);
 
                     dateParsed = DateTime.Parse(currentDate);
 
@@ -270,7 +270,7 @@ namespace WebApplication2.Services
                         Id = j - 1,
                         Date = dateParsed,
                         CurrencyCode = currencies[j - 2],
-                        Rate = exchangeRateFloat / amountOfCurrencies[j - 2]
+                        Rate = exchangeRateDouble / amountOfCurrencies[j - 2]
                     };
 
                     exchangeRatesList.Add(exchangeRate);
