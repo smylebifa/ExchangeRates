@@ -30,6 +30,8 @@ namespace WebApplication2
                 ServerVersion.AutoDetect(mySqlConnectionStr)));
 
             services.AddTransient<ExchangeRatesService>();
+            services.AddTransient<ParseExchangeRatesService>();
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

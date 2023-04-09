@@ -13,221 +13,74 @@ namespace WebApplication2.Services
     public class ExchangeRatesService
     {
         private readonly ExchangeRatesDbContext _dbContext;
-        private string WebPathOfExchangeRatesByPeriod =
-            "https://www.cnb.cz/en/financial_markets/foreign_exchange_market/exchange_rate_fixing/year.txt?year=";
+        private readonly ParseExchangeRatesService _parseExchangeRatesService;
 
-        private List<ExchangeRate> exchangeRatesList;
-
-        private int firstYearInt, lastYearInt, firstMonth, lastMonth, firstDay, lastDay;
-        private string[] currencies;
-
-        public ExchangeRatesService(ExchangeRatesDbContext dbContext)
+        public ExchangeRatesService(ExchangeRatesDbContext dbContext, ParseExchangeRatesService parseExchangeRatesService)
         {
             _dbContext = dbContext;
+            _parseExchangeRatesService = parseExchangeRatesService;
         }
         public async Task<List<ExchangeRate>> GetExchangeRatesAsync()
         {
             return await _dbContext.ExchangeRates.ToListAsync();
         }
 
-        public List<ExchangeRate> parseExchangeRatesByPeriod(DateTime first_date, DateTime last_date)
+        public Dictionary<string, float> GetDataFromExchangeRate(string currency_code, DateTime first_date, DateTime last_date)
         {
-            // Парсим и сохраняем временно переданные даты
-            parseAndSaveDates(first_date, last_date);
-            
-            // подготавливаем массивы для хранения данных
-            exchangeRatesList = new List<ExchangeRate>();
-            currencies = new string[35];
+            List<ExchangeRate> exchangeRates = _dbContext.ExchangeRates.ToList();
 
-            WebClient web = new WebClient();
-            string downloadedString;
-            string yearToParseStr;
-            string[] stringsWithExchangeRates;
+            var ratesOfCurrency = from exchangeRate in exchangeRates
+                                  where exchangeRate.CurrencyCode == currency_code &&
+                                  exchangeRate.Date >= first_date && exchangeRate.Date <= last_date
+                                  select exchangeRate.Rate;
 
-            int countOfYears = lastYearInt - firstYearInt + 1;
-            for (int index = 0; index < countOfYears; index++)
-            {
-                yearToParseStr = (firstYearInt + index).ToString();
-                downloadedString = web.DownloadString(WebPathOfExchangeRatesByPeriod + yearToParseStr);
-                stringsWithExchangeRates = downloadedString.Split('\n');
-
-                parseAndSaveCurrencies(stringsWithExchangeRates[0]);
-                parseAndSaveExchangeRates(index, countOfYears, stringsWithExchangeRates);
-            }
-
-            //_dbContext.SaveChanges();
-
-            return exchangeRatesList;
-        }
-
-        private void parseAndSaveExchangeRates(int index, int countOfYears, string[] stringsWithExchangeRates)
-        {
-            string stringWithExchangeRates;
-            string[] exchangeRates;
-            string dateStr;
-
-            // Запись всего года без проверки даты с начальной и конечной датой
-            if (index > 1 && index < countOfYears)
-            {
-                // Обход строк по датам
-                for (int j = 1; j < stringsWithExchangeRates.Length; j++)
-                {
-                    stringWithExchangeRates = stringsWithExchangeRates[j];
-                    exchangeRates = stringWithExchangeRates.Split('|');
-                    dateStr = exchangeRates[0];
-
-                    if (dateStr != "")
-                        addExchangeRates(exchangeRates, dateStr, currencies);
-                }
-            }
+            if (ratesOfCurrency == null)
+                return null;
 
             else
             {
-                string dayStr, monthStr;
-                int day, month;
+                float min = ratesOfCurrency.Min();
+                float max = ratesOfCurrency.Max();
+                float average = ratesOfCurrency.Average();
 
-                if (countOfYears > 1)
-                {
-                    // Сравниваем текущую дату с начальной
-                    if (index == 0)
-                    {
-                        // Обход строк по датам
-                        for (int j = 1; j < stringsWithExchangeRates.Length; j++)
-                        {
-                            stringWithExchangeRates = stringsWithExchangeRates[j];
-                            exchangeRates = stringWithExchangeRates.Split('|');
-                            dateStr = exchangeRates[0];
+                Dictionary<string, float> result = new Dictionary<string, float>();
+                result.Add("Мнимальное значение за период", min);
+                result.Add("Максимальное значение за период", max);
+                result.Add("Среднее значение за период", average);
 
-                            if (dateStr != "")
-                            {
-                                dayStr = dateStr.Substring(0, 2);
-                                monthStr = dateStr.Substring(3, 2);
-
-                                day = Int32.Parse(dayStr);
-                                month = Int32.Parse(monthStr);
-
-                                if (month >= firstMonth && day >= firstDay)
-                                    addExchangeRates(exchangeRates, dateStr, currencies);
-                            }
-                        }
-                    }
-
-                    // Сравниваем текущую дату с конечной
-                    else if (index == countOfYears)
-                    {
-                        // Обход строк по датам
-                        for (int j = 1; j < stringsWithExchangeRates.Length; j++)
-                        {
-                            stringWithExchangeRates = stringsWithExchangeRates[j];
-                            exchangeRates = stringWithExchangeRates.Split('|');
-                            dateStr = exchangeRates[0];
-
-                            if (dateStr != "")
-                            {
-                                dayStr = dateStr.Substring(0, 2);
-                                monthStr = dateStr.Substring(3, 2);
-
-                                day = Int32.Parse(dayStr);
-                                month = Int32.Parse(monthStr);
-
-                                if (month <= lastMonth && day <= lastDay)
-                                    addExchangeRates(exchangeRates, dateStr, currencies);
-                                else break;
-                            }
-                        }
-                    }
-
-
-                    // Сравниваем текущую дату с первой и конечной 
-                    else if (countOfYears == 1)
-                    {
-                        for (int j = 1; j < stringsWithExchangeRates.Length; j++)
-                        {
-                            stringWithExchangeRates = stringsWithExchangeRates[j];
-                            exchangeRates = stringWithExchangeRates.Split('|');
-                            dateStr = exchangeRates[0];
-
-                            if (dateStr != "")
-                            {
-                                dayStr = dateStr.Substring(0, 2);
-                                monthStr = dateStr.Substring(3, 2);
-
-                                day = Int32.Parse(dayStr);
-                                month = Int32.Parse(monthStr);
-
-                                if (month >= firstMonth && month <= lastMonth && day >= firstDay && day <= lastDay)
-                                    addExchangeRates(exchangeRates, dateStr, currencies);
-                            }
-                        }
-                    }
-                }
+                return result;
             }
         }
 
-        private void parseAndSaveDates(DateTime first_date, DateTime last_date)
+        public List<ExchangeRate> parseExchangeRatesByPeriod(DateTime first_date, DateTime last_date)
         {
-            string firstDateStr = first_date.ToString("yyyy-MM-dd");
-            string lastDateStr = last_date.ToString("yyyy-MM-dd");
+            List<ExchangeRate> exchangeRates = _parseExchangeRatesService.parseExchangeRatesByPeriod(first_date, last_date);
 
-            string firstYearStr = firstDateStr.Substring(0, 4);
-            string lastYearStr = lastDateStr.Substring(0, 4);
-
-            string firstMonthStr = firstDateStr.Substring(5, 2);
-            string lastMonthStr = lastDateStr.Substring(5, 2);
-
-            string firstDayStr = firstDateStr.Substring(8, 2);
-            string lastDayStr = lastDateStr.Substring(8, 2);
-
-            firstYearInt = Int32.Parse(firstYearStr);
-            lastYearInt = Int32.Parse(lastYearStr);
-
-            firstMonth = Int32.Parse(firstMonthStr);
-            lastMonth = Int32.Parse(lastMonthStr);
-
-            firstDay = Int32.Parse(firstDayStr);
-            lastDay = Int32.Parse(lastDayStr);
-        }
-
-        private void parseAndSaveCurrencies(string stringWithExchangeRates)
-        {
-            string[] exchangeRatesParsed = stringWithExchangeRates.Split('|');
-            string[] currenciesForParsing = new string[35];
-            if (exchangeRatesParsed[0] == "Date")
+            var exchangeRateTable = _dbContext.ExchangeRates.FirstOrDefault();
+            if (exchangeRateTable == null)
             {
-                // Обход курсов валют по строке - дате
-                for (int i = 1; i < exchangeRatesParsed.Length; i++)
-                    currenciesForParsing[i - 1] = exchangeRatesParsed[i];
+                ExchangeRate exchangeRate = exchangeRates[0];
+                exchangeRate.Id = 1;
+                _dbContext.ExchangeRates.Add(exchangeRate);
+                _dbContext.SaveChanges();
             }
-            currencies = currenciesForParsing;
-        }
 
-        //Обход курсов валют и возврат по строке - дате
-        private void addExchangeRates(string[] exchangeRatesParsed, string dateStr, string[] currencies)
-        {
-            string exchangeRateStr;
-            float exchangeRateFloat;
-            DateTime dateParsed;
-            ExchangeRate exchangeRate;
+            foreach (ExchangeRate exchangeRate in exchangeRates)
+            {
+                // Проверка на дубликаты
+                var foundedExchangeRate = _dbContext.ExchangeRates.FirstOrDefault(x => x.CurrencyCode == exchangeRate.CurrencyCode && 
+                x.Rate == exchangeRate.Rate && x.Date == exchangeRate.Date);
+               
+                if (foundedExchangeRate != null)
+                    continue;
+
+                exchangeRate.Id = _dbContext.ExchangeRates.Max(x => x.Id) + 1;
+
+                _dbContext.ExchangeRates.Add(exchangeRate);
+                _dbContext.SaveChanges();
+            }
             
-            for (int index = 1; index < exchangeRatesParsed.Length; index++)
-            {
-                exchangeRateStr = exchangeRatesParsed[index];
-                exchangeRateFloat = float.Parse(exchangeRateStr, CultureInfo.InvariantCulture.NumberFormat);
-                dateParsed = DateTime.Parse(dateStr);
-                
-                exchangeRate = new ExchangeRate()
-                {
-                    Id = index,
-                    Date = dateParsed,
-                    CurrencyCode = currencies[index - 1],
-                    Rate = exchangeRateFloat
-                };
-
-                exchangeRatesList.Add(exchangeRate);
-
-                _dbContext.ExchangeRates.AddAsync(exchangeRate);
-                _dbContext.SaveChangesAsync();
-            }
+            return exchangeRates;
         }
     }
 }

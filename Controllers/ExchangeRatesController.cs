@@ -40,5 +40,15 @@ namespace WebApplication2.Controllers
             return exchangeRates; 
         }
 
+        [HttpPost("/get_currency_data_by_period/{currency_code}/{first_date}/{last_date}")]
+        public Dictionary<string, float> GetDataFromExchangeRate(string currency_code, DateTime first_date, DateTime last_date)
+        {
+            Dictionary<string, float> result = _exchangeRatesService.GetDataFromExchangeRate(currency_code, first_date, last_date);
+
+            return result;
+        }
+
+        
+
     }
 }
