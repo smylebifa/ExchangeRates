@@ -17,7 +17,7 @@
     "optimize": false,
     "keyFile": "",
     "emitEntryPoint": true,
-    "xmlDoc": false,
+    "xmlDoc": true,
     "debugType": "portable"
   },
   "targets": {
@@ -31,6 +31,7 @@
           "Pomelo.EntityFrameworkCore.MySql.Design": "1.1.2",
           "Quartz": "3.0.0",
           "Swashbuckle.AspNetCore": "6.0.0",
+          "Swashbuckle.AspNetCore.Swagger": "6.0.0",
           "Microsoft.AspNetCore.Antiforgery": "3.0.0.0",
           "Microsoft.AspNetCore.Authentication.Abstractions": "3.0.0.0",
           "Microsoft.AspNetCore.Authentication.Cookies": "3.0.0.0",

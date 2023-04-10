@@ -1,21 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
-using WebApplication2.Data;
 using WebApplication2.Model;
 
 namespace WebApplication2.Services
 {
     public class ParseExchangeRatesService
     {
-        private string WebPathOfExchangeRatesByPeriod =
+        private readonly string WebPathOfExchangeRatesByPeriod =
             "https://www.cnb.cz/en/financial_markets/foreign_exchange_market/exchange_rate_fixing/year.txt?year=";
 
-        private string WebPathOfCurrentExchangeRates =
+        private readonly string WebPathOfCurrentExchangeRates =
             "https://www.cnb.cz/en/financial_markets/foreign_exchange_market/exchange_rate_fixing/daily.txt?date=";
         
         private List<ExchangeRate> exchangeRatesList;
@@ -24,10 +20,10 @@ namespace WebApplication2.Services
         private string[] currencies;
         private int[] amountOfCurrencies;
 
-        public List<ExchangeRate> parseExchangeRatesByPeriod(DateTime first_date, DateTime last_date)
+        public List<ExchangeRate> ParseExchangeRatesByPeriod(DateTime first_date, DateTime last_date)
         {
             // Парсим и сохраняем временно переданные даты
-            parseAndSaveDates(first_date, last_date);
+            ParseAndSaveDates(first_date, last_date);
 
             // подготавливаем массивы для хранения данных
             exchangeRatesList = new List<ExchangeRate>();
@@ -46,14 +42,14 @@ namespace WebApplication2.Services
                 downloadedString = web.DownloadString(WebPathOfExchangeRatesByPeriod + yearToParseStr);
                 stringsWithExchangeRates = downloadedString.Split('\n');
 
-                parseAndSaveCurrencies(stringsWithExchangeRates[0]);
-                parseAndSaveExchangeRates(index, countOfYears, stringsWithExchangeRates);
+                ParseAndSaveCurrencies(stringsWithExchangeRates[0]);
+                ParseAndSaveExchangeRates(index, countOfYears, stringsWithExchangeRates);
             }
 
             return exchangeRatesList;
         }
 
-        private void parseAndSaveExchangeRates(int index, int countOfYears, string[] stringsWithExchangeRates)
+        private void ParseAndSaveExchangeRates(int index, int countOfYears, string[] stringsWithExchangeRates)
         {
             string stringWithExchangeRates;
             string[] exchangeRates;
@@ -70,7 +66,7 @@ namespace WebApplication2.Services
                     dateStr = exchangeRates[0].ToString();
 
                     if (dateStr != "")
-                        addExchangeRatesAsync(exchangeRates, dateStr, currencies);
+                        AddExchangeRates(exchangeRates, dateStr, currencies);
                 }
             }
 
@@ -100,7 +96,7 @@ namespace WebApplication2.Services
                                 month = Int32.Parse(monthStr);
 
                                 if (month >= firstMonth && day >= firstDay)
-                                    addExchangeRatesAsync(exchangeRates, dateStr, currencies);
+                                    AddExchangeRates(exchangeRates, dateStr, currencies);
                             }
                         }
                     }
@@ -124,7 +120,7 @@ namespace WebApplication2.Services
                                 month = Int32.Parse(monthStr);
 
                                 if (month <= lastMonth && day <= lastDay)
-                                    addExchangeRatesAsync(exchangeRates, dateStr, currencies);
+                                    AddExchangeRates(exchangeRates, dateStr, currencies);
                                 else break;
                             }
                         }
@@ -151,14 +147,14 @@ namespace WebApplication2.Services
                             month = Int32.Parse(monthStr);
 
                             if (month >= firstMonth && month <= lastMonth && day >= firstDay && day <= lastDay)
-                                addExchangeRatesAsync(exchangeRates, dateStr, currencies);
+                                AddExchangeRates(exchangeRates, dateStr, currencies);
                         }
                     }
                 }
             }
         }
 
-        private void parseAndSaveDates(DateTime first_date, DateTime last_date)
+        private void ParseAndSaveDates(DateTime first_date, DateTime last_date)
         {
             string firstDateStr = first_date.ToString("yyyy-MM-dd");
             string lastDateStr = last_date.ToString("yyyy-MM-dd");
@@ -182,7 +178,7 @@ namespace WebApplication2.Services
             lastDay = Int32.Parse(lastDayStr);
         }
 
-        private void parseAndSaveCurrencies(string currenciesForParse)
+        private void ParseAndSaveCurrencies(string currenciesForParse)
         {
             string[] currenciesParsed = currenciesForParse.Split('|');
 
@@ -205,7 +201,7 @@ namespace WebApplication2.Services
         }
 
         //Обход курсов валют и возврат по строке - дате
-        private void addExchangeRatesAsync(string[] exchangeRatesParsed, string dateStr, string[] currencies)
+        private void AddExchangeRates(string[] exchangeRatesParsed, string dateStr, string[] currencies)
         {
             string exchangeRateStr;
             double exchangeRateDouble;
@@ -230,7 +226,7 @@ namespace WebApplication2.Services
             }
         }
 
-        public List<ExchangeRate> parseCurrentExchangeRates()
+        public List<ExchangeRate> ParseCurrentExchangeRates()
         {
             exchangeRatesList = new List<ExchangeRate>();
             currencies = new string[35];
@@ -276,6 +272,7 @@ namespace WebApplication2.Services
                     exchangeRatesList.Add(exchangeRate);
                 }
             }
+
             return exchangeRatesList;
         }
     }

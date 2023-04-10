@@ -6,6 +6,10 @@ using Microsoft.Extensions.Hosting;
 using WebApplication2.Data;
 using Microsoft.EntityFrameworkCore;
 using WebApplication2.Services;
+using Microsoft.OpenApi.Models;
+using System;
+using System.Reflection;
+using System.IO;
 
 namespace WebApplication2
 {
@@ -21,9 +25,29 @@ namespace WebApplication2
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            //services.AddControllersWithViews();
-            services.AddSwaggerGen();
-            
+
+            //services.AddSwaggerGen();
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("ExchangeRates", new OpenApiInfo
+                {
+                    Version = "ExchangeRates",
+                    Title = "API по работе с курсами валют",
+                    Description = "API предоставляет возможность сохранять курсы валют за период, " +
+                    "сохранять актуальные курсы с заданной периодичностью и получать статистику по курсам",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Samoilov",
+                        Url = new Uri("https://github.com/smylebifa")
+                    }
+                });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+            }
+            );
+
             string mySqlConnectionStr = Configuration.GetConnectionString("Default");
 
             services.AddDbContext<ExchangeRatesDbContext>(options => options.UseMySql(mySqlConnectionStr,
@@ -36,15 +60,12 @@ namespace WebApplication2
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
             app.UseSwagger();
-
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API");
+                c.SwaggerEndpoint("/swagger/ExchangeRates/swagger.json", "ExchangeRates");
             });
 
             app.UseHttpsRedirection();

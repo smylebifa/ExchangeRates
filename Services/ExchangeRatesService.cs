@@ -1,11 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Quartz;
+﻿using Quartz;
 using Quartz.Impl;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using WebApplication2.Data;
 using WebApplication2.Model;
@@ -41,8 +38,8 @@ namespace WebApplication2.Services
             {
                 await Task.Delay(TimeSpan.FromSeconds(5));
 
-                exchangeRates = _parseExchangeRatesService.parseCurrentExchangeRates();
-                saveExchangeRate(exchangeRates);
+                exchangeRates = _parseExchangeRatesService.ParseCurrentExchangeRates();
+                SaveExchangeRate(exchangeRates);
 
                 if (DateTime.Now > timeToShutDown)
                 {
@@ -61,7 +58,7 @@ namespace WebApplication2.Services
                                   exchangeRate.Date >= first_date && exchangeRate.Date <= last_date
                                   select exchangeRate.Rate;
 
-            if (ratesOfCurrency == null)
+            if (ratesOfCurrency == null || ratesOfCurrency.Count() == 0)
                 return null;
 
             else
@@ -79,14 +76,14 @@ namespace WebApplication2.Services
             }
         }
 
-        public List<ExchangeRate> saveParsedCurrencies(DateTime first_date, DateTime last_date)
+        public List<ExchangeRate> SaveParsedCurrencies(DateTime first_date, DateTime last_date)
         {
-            List<ExchangeRate> exchangeRates = _parseExchangeRatesService.parseExchangeRatesByPeriod(first_date, last_date);
-            saveExchangeRate(exchangeRates);
+            List<ExchangeRate> exchangeRates = _parseExchangeRatesService.ParseExchangeRatesByPeriod(first_date, last_date);
+            SaveExchangeRate(exchangeRates);
             return exchangeRates;
         }
 
-        private void saveExchangeRate(List<ExchangeRate> exchangeRates)
+        private void SaveExchangeRate(List<ExchangeRate> exchangeRates)
         {
             var exchangeRateTable = _dbContext.ExchangeRates.FirstOrDefault();
             if (exchangeRateTable == null)
