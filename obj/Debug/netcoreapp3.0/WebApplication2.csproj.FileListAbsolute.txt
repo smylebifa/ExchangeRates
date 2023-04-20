@@ -182,3 +182,5 @@ C:\Users\Oleg\source\repos\WebApplication2\bin\Debug\netcoreapp3.0\Swashbuckle.A
 C:\Users\Oleg\source\repos\WebApplication2\obj\Debug\netcoreapp3.0\WebApplication2.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\Oleg\source\repos\WebApplication2\obj\Debug\netcoreapp3.0\WebApplication2.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\Oleg\source\repos\WebApplication2\obj\Debug\netcoreapp3.0\WebApplication2.xml
+C:\Users\Oleg\source\repos\WebApplication2\bin\Debug\netcoreapp3.0\App.config
+C:\Users\Oleg\source\repos\WebApplication2\bin\Debug\netcoreapp3.0\WebApplication2.dll.config

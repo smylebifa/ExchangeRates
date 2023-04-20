@@ -38,7 +38,7 @@ namespace WebApplication2.Services
             int countOfYears = lastYearInt - firstYearInt;
             for (int index = 0; index <= countOfYears; index++)
             {
-                yearToParseStr = (firstYearInt + index).ToString("yyyy-MM-dd");
+                yearToParseStr = (firstYearInt + index).ToString();
                 downloadedString = web.DownloadString(WebPathOfExchangeRatesByPeriod + yearToParseStr);
                 stringsWithExchangeRates = downloadedString.Split('\n');
 

@@ -1,6 +1,4 @@
-﻿using Quartz;
-using Quartz.Impl;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,40 +11,18 @@ namespace WebApplication2.Services
     {
         private readonly ExchangeRatesDbContext _dbContext;
         private readonly ParseExchangeRatesService _parseExchangeRatesService;
+        private readonly SheduleService _sheduleService;
 
-        public ExchangeRatesService(ExchangeRatesDbContext dbContext, ParseExchangeRatesService parseExchangeRatesService)
+        public ExchangeRatesService(ExchangeRatesDbContext dbContext, ParseExchangeRatesService parseExchangeRatesService, SheduleService sheduleService)
         {
             _dbContext = dbContext;
             _parseExchangeRatesService = parseExchangeRatesService;
+            _sheduleService = sheduleService;
         }
 
-        // Незавершенное - пока что увеличивает полученный пользователем курс на единицу каждую секунду 
-        // (должны парситься текущие курсы и сохраняться в БД по расписанию)
         public async Task GetUpToDateExchangeRates()
         {
-            List<ExchangeRate> exchangeRates;
-
-            StdSchedulerFactory factory = new StdSchedulerFactory();
-            IScheduler scheduler = await factory.GetScheduler();
-
-            await scheduler.Start();
-
-            DateTime timeToShutDown = DateTime.Now.AddMinutes(1.0f);
-
-            bool triggerShutDown = false;
-            while (!triggerShutDown)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-
-                exchangeRates = _parseExchangeRatesService.ParseCurrentExchangeRates();
-                SaveExchangeRate(exchangeRates);
-
-                if (DateTime.Now > timeToShutDown)
-                {
-                    await scheduler.Shutdown();
-                    triggerShutDown = true;
-                }
-            }
+           await _sheduleService.GetUpToDateExchangeRates();
         }
 
         public Dictionary<string, double> GetDataFromExchangeRate(string currency_code, DateTime first_date, DateTime last_date)
@@ -111,4 +87,5 @@ namespace WebApplication2.Services
             }
         }
     }
+
 }
